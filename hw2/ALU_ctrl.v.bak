@@ -2,10 +2,13 @@
 
 module ALU_ctrl( funct, ALU_OP,ALU_CTRL );
 
-    input [5:0] funct;
+    	input [5:0] funct;
 	input [1:0] ALU_OP;
-    output [3:0]ALU_CTRL;
-   
+    	output [3:0]ALU_CTRL;
+	   /* add your design */   
+	reg [3:0]ALU_CTRL;
+initial
+begin
 	if(ALU_OP == 0)
 	begin
 		ALU_CTRL = 4'b0010;
@@ -40,11 +43,11 @@ module ALU_ctrl( funct, ALU_OP,ALU_CTRL );
 	else
 	begin
 	end
+end
+	
+	
+	
 
-	
-	
-	
-	   /* add your design */   
 	
 
 

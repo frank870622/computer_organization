@@ -19,29 +19,26 @@ begin
 	end
 	else if(ALU_OP == 2)
 	begin
-		if(funct == 32)
+		if(funct == 6'b100000)
 		begin
 			ALU_CTRL = 4'b0010;
 		end
-		else if(funct == 34)
+		else if(funct == 6'b100010)
 		begin
 			ALU_CTRL = 4'b0110;
 		end
-		else if(funct == 36)
+		else if(funct == 6'b100100)
 		begin
 			ALU_CTRL = 4'b0000;
 		end
-		else if(funct == 37)
+		else if(funct == 6'b100101)
 		begin
 			ALU_CTRL = 4'b0001;
 		end
-		else
+		else if(funct == 6'b101010)
 		begin
 			ALU_CTRL = 4'b1111;
 		end
-	end
-	else
-	begin
 	end
 end
 	

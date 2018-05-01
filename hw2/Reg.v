@@ -10,16 +10,21 @@ module Reg(CLK, RS_ID, RT_ID, REG_W_ID, Reg_WE, Reg_RData1, Reg_RData2, Reg_WDat
 	reg signed [15:0] Register [0:7];
 	reg [15:0] Reg_RData1,Reg_RData2;
 	
+
+	always@(posedge CLK)
+	begin
+		Reg_RData1 = Register[RS_ID];
+		Reg_RData2 = Register[RT_ID];
+	end
 	
 	
 	always@(posedge CLK) begin
-		Reg_RData1 = Register[RS_ID];
-		Reg_RData2 = Register[RT_ID];
+		
+
 		if( Reg_WE == 1 )
 			Register[REG_W_ID] <= Reg_WData;
-		else 
-			Register[RT_ID] <= Register[RS_ID];
-		
+		//else 
+			//Register[REG_W_ID] <= Register[REG_W_ID];
 	end
 
 endmodule

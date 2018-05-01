@@ -6,7 +6,7 @@ module sign_extend(immediate_in, sign_extend );
 	output [15:0] sign_extend;
 	reg [15:0] sign_extend;
 	initial begin
-		sign_extend = immediate_in*4;
+		sign_extend = immediate_in << 2;
 	end
 	
 endmodule

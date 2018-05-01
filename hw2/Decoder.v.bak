@@ -8,6 +8,8 @@ module Decoder( OP, Reg_WE, DM_WE, ALU_OP, ALU_src,MEM_to_REG,REG_Dst,funct);
 	
 
    /* add your design */   	
+	reg Reg_WE, DM_WE, ALU_src,MEM_to_REG,REG_Dst;
+	reg [1:0] ALU_OP;
 initial
 begin
 	if(OP == 0)
@@ -20,7 +22,7 @@ begin
 		ALU_OP = 2;
 		
 	end
-	else if(OP == 35)
+	else if(OP == 6'b100011)
 	begin
 		REG_Dst = 0;
 		ALU_src = 1;
@@ -29,7 +31,7 @@ begin
 		DM_WE = 0;
 		ALU_OP = 0;
 	end
-	else if(OP == 43)
+	else if(OP == 6'b101011)
 	begin
 		REG_Dst = 0;
 		ALU_src = 1;
@@ -38,7 +40,7 @@ begin
 		DM_WE = 1;
 		ALU_OP = 0;
 	end
-	else
+	else if(OP = 6'b000100)
 	begin
 		REG_Dst = 0;
 		ALU_src = 0;

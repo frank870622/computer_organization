@@ -22,7 +22,7 @@ begin
 		ALU_OP = 2;
 		
 	end
-	else if(OP == 35)
+	else if(OP == 6'b100011)
 	begin
 		REG_Dst = 0;
 		ALU_src = 1;
@@ -31,7 +31,7 @@ begin
 		DM_WE = 0;
 		ALU_OP = 0;
 	end
-	else if(OP == 43)
+	else if(OP == 6'b101011)
 	begin
 		REG_Dst = 0;
 		ALU_src = 1;
@@ -40,7 +40,7 @@ begin
 		DM_WE = 1;
 		ALU_OP = 0;
 	end
-	else
+	else if(OP == 6'b000100)
 	begin
 		REG_Dst = 0;
 		ALU_src = 0;

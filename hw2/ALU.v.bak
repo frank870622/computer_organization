@@ -10,15 +10,15 @@ module ALU( source1,source2,ALU_CTRL,result);
 	reg [15:0] result;
 initial
 begin
-	if(ALU_CTRL == 0)
-		result = source1 & source2;
-	else if(ALU_CTRL == 1)
+	if(ALU_CTRL == 4'b0000)
+		result = and(source1,source2);
+	else if(ALU_CTRL == 4'b0001)
 		result = source1 | source2;
-	else if(ALU_CTRL == 2)
+	else if(ALU_CTRL == 4'b0010)
 		result = source1 + source2;
-	else if(ALU_CTRL == 6)
-		reslut = source1 - source2;
-	else
+	else if(ALU_CTRL == 4'b0110)
+		result = source1 - source2;
+	else if(ALU_CTRL == 4'b0111)
 		if(source1 < source2)
 			result = 1;
 		else
