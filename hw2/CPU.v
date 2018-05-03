@@ -71,7 +71,8 @@ module CPU(CLK, START);
 	/*add your code here*/
 	assign Reg_WData = Mux_Mem_to_reg_out;
 	assign funct = Instr[5:0];
-	assign ALU_src1 = Reg_RData2;
+	assign ALU_src1 = Reg_RData1;
 	assign ALU_src2 = Mux_to_ALU;
+	assign address = ALU_result;
 	
 endmodule

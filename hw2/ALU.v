@@ -7,23 +7,40 @@ module ALU( source1,source2,ALU_CTRL,result);
     output [15:0] result;
 	 
 	   /* add your design */   
-	reg [15:0] result;
-initial
+	//reg [15:0] result;
+
+	//wire [3:0] CTRL_temp;
+	//wire [15:0] source1_temp, source2_temp;
+
+	//assign CTRL_temp = ALU_CTRL;
+	//assign source1_temp = source1;
+	//assign source2_temp = source2;
+
+	assign result = (ALU_CTRL == 0)? source1 & source2 :
+			(ALU_CTRL == 1)? source1 | source2 :
+			(ALU_CTRL == 2)? source1 + source2 :
+			(ALU_CTRL == 6)? source1 - source2 :
+			(source1 < source2)? 1 : 1;
+
+
+/*
+always@
 begin
-	if(ALU_CTRL == 4'b0000)
+	if(CTRL_temp == 4'b0000)
 		result = source1 & source2;
-	else if(ALU_CTRL == 4'b0001)
+	else if(CTRL_temp == 1)
 		result = source1 | source2;
-	else if(ALU_CTRL == 4'b0010)
+	else if(CTRL_temp == 2)
 		result = source1 + source2;
-	else if(ALU_CTRL == 4'b0110)
+	else if(CTRL_temp == 6)
 		result = source1 - source2;
-	else if(ALU_CTRL == 4'b0111)
+	else if(CTRL_temp == 7)
 		if(source1 < source2)
 			result = 1;
 		else
 			result = 0;
 end
-	
+*/
+
 
 endmodule

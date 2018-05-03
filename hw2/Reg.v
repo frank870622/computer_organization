@@ -8,19 +8,14 @@ module Reg(CLK, RS_ID, RT_ID, REG_W_ID, Reg_WE, Reg_RData1, Reg_RData2, Reg_WDat
 	output [15:0] Reg_RData1;
 	output [15:0] Reg_RData2;
 	reg signed [15:0] Register [0:7];
-	reg [15:0] Reg_RData1,Reg_RData2;
+	//reg [15:0] Reg_RData1,Reg_RData2;
 	
-
-	always@(posedge CLK)
-	begin
-		Reg_RData1 = Register[RS_ID];
-		Reg_RData2 = Register[RT_ID];
-	end
+	assign Reg_RData1 = Register[RS_ID];
+	assign Reg_RData2 = Register[RT_ID];
 	
 	
 	always@(posedge CLK) begin
 		
-
 		if( Reg_WE == 1 )
 			Register[REG_W_ID] <= Reg_WData;
 		//else 
