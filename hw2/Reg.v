@@ -18,8 +18,8 @@ module Reg(CLK, RS_ID, RT_ID, REG_W_ID, Reg_WE, Reg_RData1, Reg_RData2, Reg_WDat
 		
 		if( Reg_WE == 1 )
 			Register[REG_W_ID] <= Reg_WData;
-		//else 
-			//Register[REG_W_ID] <= Register[REG_W_ID];
+		else 
+			Register[REG_W_ID] <= Register[REG_W_ID];
 	end
 
 endmodule

@@ -16,11 +16,12 @@ module ALU( source1,source2,ALU_CTRL,result);
 	//assign source1_temp = source1;
 	//assign source2_temp = source2;
 
-	assign result = (ALU_CTRL == 0)? source1 & source2 :
-			(ALU_CTRL == 1)? source1 | source2 :
-			(ALU_CTRL == 2)? source1 + source2 :
-			(ALU_CTRL == 6)? source1 - source2 :
-			(source1 < source2)? 1 : 1;
+	assign result = (ALU_CTRL == 4'b0000)? source1 & source2 :
+			(ALU_CTRL == 4'b0001)? source1 | source2 :
+			(ALU_CTRL == 4'b0010)? source1 + source2 :
+			(ALU_CTRL == 4'b0110)? source1 - source2 :
+			(ALU_CTRL == 4'b0111 && source1 < source2)? 1 :
+			(ALU_CTRL == 4'b0111 && source1 >= source2)? 0 : 0;
 
 
 /*
