@@ -6,22 +6,193 @@
 #include <vector>
 #include <algorithm>
 #include <list>
+#include <map>
 using namespace std;
-int cache_size;
-int block_size;
-int blocks;
-int words;
-int cache_index;
-int associativity;
-int algorithm;
-int turn = 1;
-list <string> tag_index;
-vector <string> index;
-vector <list<string> > index_of_4;
-vector <int> hit;
-vector <int> miss;
 
-string hexadecimal_to_binarystring(char);
+int turn = 1;
+map<unsigned int, list<unsigned int> > fourcache;
+map<unsigned int, unsigned int> directcache;
+list<unsigned int> fullycache;
+vector<int> hit;
+vector<int> miss;
+
+int string_to_int(string);
+unsigned int hexadecimal_to_decimal(string);
+int log2(int);
+void direct_mapped(unsigned int,unsigned int);
+void four_way_set_associative(unsigned int, unsigned int, int);
+void fully_associative (unsigned int, int, int);
+
+int main(int argc, char* argv[]){
+    fstream file;
+    fstream out;
+    file.open(argv[2] ,ios::in);
+    out.open(argv[4] ,ios::out);
+    if(out.fail())    cout << "fail" << endl;
+
+
+    int cache_size;
+    int block_size;
+    int associativity;
+    int algorithm;
+
+    string cache_size_string;
+    string block_size_string;
+    string associativitystring;
+    string algorithmstring;
+    getline(file, cache_size_string);
+    getline(file, block_size_string);
+    getline(file, associativitystring);
+    getline(file, algorithmstring);
+    cache_size = string_to_int(cache_size_string) * 1024;
+    block_size = string_to_int(block_size_string);
+    associativity = string_to_int(associativitystring);
+    algorithm = string_to_int(algorithmstring);
+
+    int block_number = cache_size / block_size;
+    int words = log2(block_size);
+    /*
+    cout << "cache_size: " << cache_size << endl;
+    cout << "block_size: " << block_size << endl;
+    cout << "associativity: " << associativity << endl;
+    cout << "algorithm: " << algorithm << endl;
+    cout << "block_number: " << block_number << endl;
+    cout << "words: " << words << endl;
+    */
+    string inputstring;
+    if(associativity == 0){
+        while(getline(file, inputstring)){
+            //cout << inputstring << endl << inputstring.substr(2,8) << endl;
+            unsigned int address = (hexadecimal_to_decimal(inputstring.substr(2,8)) >> words);
+            direct_mapped(address, address%(block_number));
+            //cout << address << endl;
+        }
+    }
+    else if(associativity == 1){
+        while(getline(file, inputstring)){
+            //cout << inputstring << endl << inputstring.substr(2,8) << endl;
+            unsigned int address = (hexadecimal_to_decimal(inputstring.substr(2,8)) >> words);
+            four_way_set_associative(address, address%(block_number/4), algorithm);
+            //cout << address << endl;
+        }
+    }
+    else {
+        while(getline(file, inputstring)){
+            //cout << inputstring << endl << inputstring.substr(2,8) << endl;
+            unsigned int address = (hexadecimal_to_decimal(inputstring.substr(2,8)) >> words);
+            fully_associative(address, block_number, algorithm);
+            //cout << address << endl;
+        }
+    }
+
+    out << "Hits instructions: ";
+    for(int i = 0; i < hit.size();++i){
+        if(i == hit.size()-1){
+            out << hit[i] << endl;
+            break;
+        }
+        out << hit[i] << ",";
+    }
+    out << "Misses instructions: ";
+    for(int i = 0; i < miss.size();++i){
+        if(i == miss.size()-1){
+            out << miss[i] << endl;
+            break;
+        }
+        out << miss[i] << ",";
+    }
+
+    out << "Miss rate: " << (float)miss.size()/(float)(hit.size()+ miss.size());
+    //cout << "Miss rate: " << (float)miss.size()/(float)(hit.size()+ miss.size()) << endl;
+    return 0;
+}
+
+void fully_associative (unsigned int address, int block_number, int algorithm){
+    if(algorithm == 0){
+        if(find(fullycache.begin(), fullycache.end(), address) != fullycache.end()){
+            hit.push_back(turn);
+        }
+        else{
+            miss.push_back(turn);
+            if(fullycache.size() >= block_number){
+                fullycache.pop_front();
+            }
+            fullycache.push_back(address);
+        }
+    }
+    else {
+        if(find(fullycache.begin(), fullycache.end(), address) != fullycache.end()){
+            hit.push_back(turn);
+            fullycache.remove(address);
+            fullycache.push_back(address);
+        }
+        else{
+            miss.push_back(turn);
+            if(fullycache.size() >= block_number){
+                fullycache.pop_front();
+            }
+            fullycache.push_back(address);
+        }
+    }
+    turn ++;
+}
+
+void direct_mapped(unsigned int address,unsigned int index){
+    if(directcache.find(index) == directcache.end()){
+        directcache[index] = address;
+        miss.push_back(turn);
+    }
+    else {
+        if(directcache[index] == address){
+            hit.push_back(turn);
+        }
+        else {
+            miss.push_back(turn);
+            directcache[index] = address;
+        }
+        turn++;
+    }
+}
+
+void four_way_set_associative(unsigned int address, unsigned int index, int algorithm){
+    //cout << "address: " << address << endl;
+    //cout << "index: " << index << endl;
+    if(fourcache.find(index) == fourcache.end()){
+        list<unsigned int> a;
+        fourcache[index] = a;
+        miss.push_back(turn);
+    }
+    else {
+        if(algorithm == 0){
+            if(find(fourcache[index].begin(), fourcache[index].end(), address) != fourcache[index].end()){
+                hit.push_back(turn);
+            }
+            else {
+                miss.push_back(turn);
+                if(fourcache[index].size() >= 4){
+                    fourcache[index].pop_front();
+                }
+                fourcache[index].push_back(address);
+            }
+        }
+        else{
+            if(find(fourcache[index].begin(), fourcache[index].end(), address) != fourcache[index].end()){
+                hit.push_back(turn);
+                fourcache[index].remove(address);
+                fourcache[index].push_back(address);
+            }
+            else {
+                miss.push_back(turn);
+                if(fourcache[index].size() >= 4){
+                    fourcache[index].pop_front();
+                }
+                fourcache[index].push_back(address);
+            }
+        }
+    }
+    turn++;
+}
+
 int string_to_int(string input){
     stringstream ss;
     ss << input;
@@ -29,257 +200,16 @@ int string_to_int(string input){
     ss >> output;
     return output;
 }
-string hexadecimal_to_binary(string input){
-    //cout << input << "\n";
-    string output;
-    for(int i = 0; i < 8; ++i){
-        output += hexadecimal_to_binarystring(input[i]);
-    }
 
-	//cout << output << "\n";
+unsigned int hexadecimal_to_decimal(string input){
+    unsigned int output;
+    stringstream ss;
+    ss << std::hex << input;
+    ss >> output;
     return output;
-}
-int binary_to_decimal(string input){
-    int output = 0;
-    int mux = 1;
-    for(int i = input.length()-1 ; i >= 0; --i){
-        output += mux*(input[i] == '0'? 0:1);
-        mux *= 2;
-    }
-    return output;
-}
-string hexadecimal_to_binarystring(char input){
-    switch(input){
-        case '0' :
-            return "0000";
-            break;
-        case '1':
-            return "0001";
-            break;
-        case '2' :
-            return "0010";
-            break;
-        case '3':
-            return "0011";
-            break;
-        case '4' :
-            return "0100";
-            break;
-        case '5':
-            return "0101";
-            break;
-        case '6' :
-            return "0110";
-            break;
-        case '7':
-            return "0111";
-            break;
-        case '8' :
-            return "1000";
-            break;
-        case '9':
-            return "1001";
-            break;
-        case 'a':
-        case 'A':
-            return "1010";
-            break;
-        case 'b' :
-        case 'B':
-            return "1011";
-            break;
-        case 'c':
-        case 'C':
-            return "1100";
-            break;
-        case 'd' :
-        case 'D':
-            return "1101";
-            break;
-        case 'e':
-        case 'E':
-            return "1110";
-            break;
-        case 'f':
-        case 'F':
-            return "1111";
-            break;
-    }
 }
 
 int log2(int input){
     int output = log(input) / log(2);
     return output;
 }
-void fully_associative (string input){
-    if(algorithm == 0){
-        if(find(tag_index.begin(), tag_index.end(), input) != tag_index.end()){
-            hit.push_back(turn);
-        }
-        else{
-            if(tag_index.size() == cache_index){
-                tag_index.erase(tag_index.begin());
-            }
-            miss.push_back(turn);
-            tag_index.push_back(input);
-        }
-    }
-    else {
-        if(find(tag_index.begin(), tag_index.end(), input) != tag_index.end()){
-            hit.push_back(turn);
-            tag_index.remove(input);
-            tag_index.push_back(input);
-        }
-        else{
-            if(tag_index.size() == cache_index){
-                tag_index.erase(tag_index.begin());
-            }
-            miss.push_back(turn);
-            tag_index.push_back(input);
-        }
-    }
-
-}
-void four_way_set_associative(string inputaddress,string inputindex){
-    if(find(index_of_4[binary_to_decimal(inputindex)].begin(), index_of_4[binary_to_decimal(inputindex)].end(), inputaddress) != index_of_4[binary_to_decimal(inputindex)].end()){
-        hit.push_back(turn);
-    }
-    else{
-        if(index_of_4[binary_to_decimal(inputindex)].size() == blocks/4){
-                index_of_4[binary_to_decimal(inputindex)].erase(index_of_4[binary_to_decimal(inputindex)].begin());
-            }
-            miss.push_back(turn);
-            index_of_4[binary_to_decimal(inputindex)].push_back(inputaddress);
-    }
-}
-void direct_mapped(string inputaddress,string inputindex){
-    if(index[binary_to_decimal(inputindex)] == inputaddress){
-        hit.push_back(turn);
-    }
-    else{
-        miss.push_back(turn);
-        index[binary_to_decimal(inputindex)] = inputaddress;
-    }
-
-}
-int main(){
-    fstream file;
-    file.open("trace1.txt",ios::in);
-
-    string cache_size_string;
-    getline(file, cache_size_string);
-    cache_size = string_to_int(cache_size_string);
-
-    string block_size_string;
-    getline(file, block_size_string);
-    block_size = string_to_int(block_size_string);
-
-    blocks = cache_size/block_size;
-    cache_index = log2(blocks);
-    words = log2(block_size);
-
-    //cout << cache_size << "\n" << block_size << "\n" << blocks << "\n" << cache_index << "\n" << words << "\n";
-
-    string associativitystring;
-    getline(file, associativitystring);
-    associativity = string_to_int(associativitystring);
-    //cout << associativity << "\n";
-
-    string algorithmstring;
-    getline(file, algorithmstring);
-    algorithm = string_to_int(algorithmstring);
-    //cout << algorithm << "\n";
-
-    if(associativity == 2){
-        while(file.peek() != EOF){
-            string inputstring;
-            getline(file, inputstring);
-            string intputaddress = hexadecimal_to_binary(inputstring.substr(2,10));
-            //cout << intputaddress.substr(0,32-words+1) << "\n";
-            fully_associative(intputaddress.substr(0,32-words+1));
-            turn++;
-        }
-        cout << "Hits instructions: ";
-        for(int i = 0; i < hit.size();++i){
-            if(i == hit.size()-1){
-                cout << hit[i];
-                break;
-            }
-            cout << hit[i] << ",";
-        }
-        cout << "\nMisses instructions: ";
-        for(int i = 0; i < miss.size();++i){
-            if(i == miss.size()-1){
-                cout << miss[i];
-                break;
-            }
-            cout << miss[i] << ",";
-        }
-        cout << "\nMiss rate: " << (float)miss.size()/(float)(hit.size()+ miss.size());
-    }
-    else if(associativity == 1){
-        for(int i = 0; i < blocks/4;++i){
-            list<string> a;
-            index_of_4.push_back(a);
-        }
-        while(file.peek() != EOF){
-            string inputstring;
-            getline(file, inputstring);
-            string intputaddress = hexadecimal_to_binary(inputstring.substr(2,10));
-            //cout << intputaddress.substr(0,32-words+1) << "\n";
-            four_way_set_associative(intputaddress.substr(0,32-words+1), intputaddress.substr(32-words+1-cache_index, cache_index-2));
-            turn++;
-        }
-        cout << "Hits instructions: ";
-        for(int i = 0; i < hit.size();++i){
-            if(i == hit.size()-1){
-                cout << hit[i];
-                break;
-            }
-            cout << hit[i] << ",";
-        }
-        cout << "\nMisses instructions: ";
-        for(int i = 0; i < miss.size();++i){
-            if(i == miss.size()-1){
-                cout << miss[i];
-                break;
-            }
-            cout << miss[i] << ",";
-        }
-        cout << "\nMiss rate: " << (float)miss.size()/(float)(hit.size()+ miss.size());
-    }
-    else if(associativity == 0){
-        for(int i = 0; i < blocks;++i){
-            index.push_back("null");
-        }
-        while(file.peek() != EOF){
-            string inputstring;
-            getline(file, inputstring);
-            string intputaddress = hexadecimal_to_binary(inputstring.substr(2,10));
-            //cout << intputaddress.substr(0,32-words+1) << "\n";
-            direct_mapped(intputaddress.substr(0,32-words+1), intputaddress.substr(32-words+1-cache_index, cache_index));
-            turn++;
-        }
-        cout << "Hits instructions: ";
-        for(int i = 0; i < hit.size();++i){
-            if(i == hit.size()-1){
-                cout << hit[i];
-                break;
-            }
-            cout << hit[i] << ",";
-        }
-        cout << "\nMisses instructions: ";
-        for(int i = 0; i < miss.size();++i){
-            if(i == miss.size()-1){
-                cout << miss[i];
-                break;
-            }
-            cout << miss[i] << ",";
-        }
-        cout << "\nMiss rate: " << (float)miss.size()/(float)(hit.size()+ miss.size());
-    }
-
-    return 0;
-}
-
-
