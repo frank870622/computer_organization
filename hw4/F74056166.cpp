@@ -25,10 +25,9 @@ void fully_associative (unsigned int, int, int);
 
 int main(int argc, char* argv[]){
     fstream file;
-    fstream out;
+    ofstream out(argv[4]);
     file.open(argv[2] ,ios::in);
-    out.open(argv[4] ,ios::out);
-    if(out.fail())    cout << "fail" << endl;
+    //out.open(argv[4] ,ios::out);
 
 
     int cache_size;
@@ -72,7 +71,7 @@ int main(int argc, char* argv[]){
         while(getline(file, inputstring)){
             //cout << inputstring << endl << inputstring.substr(2,8) << endl;
             unsigned int address = (hexadecimal_to_decimal(inputstring.substr(2,8)) >> words);
-            four_way_set_associative(address, address%(block_number/4), algorithm);
+            four_way_set_associative(address, address%((unsigned int)block_number/4), algorithm);
             //cout << address << endl;
         }
     }
@@ -88,21 +87,21 @@ int main(int argc, char* argv[]){
     out << "Hits instructions: ";
     for(int i = 0; i < hit.size();++i){
         if(i == hit.size()-1){
-            out << hit[i] << endl;
+            out << hit[i];
             break;
         }
         out << hit[i] << ",";
     }
-    out << "Misses instructions: ";
+    out << endl << "Misses instructions: ";
     for(int i = 0; i < miss.size();++i){
         if(i == miss.size()-1){
-            out << miss[i] << endl;
+            out << miss[i];
             break;
         }
         out << miss[i] << ",";
     }
 
-    out << "Miss rate: " << (float)miss.size()/(float)(hit.size()+ miss.size());
+    out << endl << "Miss rate: " << (float)miss.size()/(float)(hit.size()+ miss.size()) << endl;
     //cout << "Miss rate: " << (float)miss.size()/(float)(hit.size()+ miss.size()) << endl;
     return 0;
 }
@@ -160,6 +159,7 @@ void four_way_set_associative(unsigned int address, unsigned int index, int algo
     if(fourcache.find(index) == fourcache.end()){
         list<unsigned int> a;
         fourcache[index] = a;
+        fourcache[index].push_back(address);
         miss.push_back(turn);
     }
     else {
