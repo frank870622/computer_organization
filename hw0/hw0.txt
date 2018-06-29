@@ -1,0 +1,48 @@
+module hw0(pass,rst,clk,R,G,Y);
+input pass,rst,clk;
+output R,G,Y;
+
+reg [5:0]second;
+reg [31:0]clk;
+reg R,G,Y;
+
+always@ (posedge clk)
+begin
+	if(rst)
+	begin
+		second = 6'd0;
+		clk = 32'd0;
+	end
+	else
+	begin
+		if(clk == 32'd50000000)
+		begin
+			clk = 32'd0;
+			second = second + 6'd1;
+		end
+		if(second > 27)
+		begin
+			second = 0;
+		end
+		
+		if(second < 10)
+		begin
+			R = 1;
+			G = 0;
+			Y = 0;
+		end
+		else if(second >=10 && second <22)
+		begin
+			R = 0;
+			G = 1;
+			Y = 0;
+		end
+		else
+		begin
+			R = 0;
+			G = 0;
+			Y = 1;
+		end
+	end
+end
+endmodule
